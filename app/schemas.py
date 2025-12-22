@@ -1,6 +1,18 @@
 from datetime import date, datetime
+from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class HealthStatus(str, Enum):
+    GOOD = "Здорова"
+    BAD = "Больна"
+
+
+class AnimalSpecies(str, Enum):
+    cow = "Корова"
+    goat = "Коза"
+    sheep = "Овца"
 
 
 class GeneticTest(BaseModel):
@@ -17,9 +29,30 @@ class GeneticTest(BaseModel):
             ]
         }
     )
-    animal_name: str
-    species: str
-    test_date: date
-    milk_yield: str
-    health_status: str
+    animal_name: str = Field(min_length=2, max_length=30, description="Имя животного")
+    species: AnimalSpecies = Field(description="Вид животного: Корова, Овца, Коза")
+    test_date: date = Field(description="Дата проведения генетического теста животного")
+    milk_yield: float = Field(ge=0, lt=50, description="Продуктивность животного в литрах")
+    health_status: HealthStatus = Field(description="Состояние здоровья животного: Здорова, Больна")
 
+
+class GeneticTestFromDB(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    animal_name: str
+    species: AnimalSpecies
+    test_date: date
+    milk_yield: float
+    health_status: HealthStatus
+    created_at: datetime
+
+
+class Statistics(BaseModel):
+    species: str = Field(description="Вид животного: Корова, Овца, Коза")
+    total_tests: int = Field(description="Количество тестов для данного вида животного")
+    avg_milk_yield: float = Field(description="Среднее значение продуктивности для данного вида животного")
+    max_milk_yield: float = Field(description="Максимальное значение продуктивности для данного вида животного")
+    good_health_percentage: float = Field(
+        description="Процент животных с хорошим состоянием здоровья для данного вида животного"
+    )

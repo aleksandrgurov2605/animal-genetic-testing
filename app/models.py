@@ -13,6 +13,6 @@ class AnimalGeneticTests(Base):
     animal_name: Mapped[str]
     species: Mapped[str]
     test_date: Mapped[datetime.date]
-    milk_yield: Mapped[str]
+    milk_yield: Mapped[float]
     health_status: Mapped[str]
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
