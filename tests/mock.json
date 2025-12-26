@@ -1,0 +1,35 @@
+[
+  {
+  "animal_name": "Бурёнка",
+  "health_status": "Здорова",
+  "test_date": "2017-03-12",
+  "milk_yield": 22.4,
+  "species": "Корова"
+
+}, {
+  "animal_name": "Бурёнка_2",
+  "health_status": "Здорова",
+  "test_date": "2017-03-12",
+  "milk_yield": 12.4,
+  "species": "Корова"
+}, {
+  "animal_name": "Бурёнка_3",
+  "health_status": "Больна",
+  "test_date": "2017-03-12",
+  "milk_yield": 2.4,
+  "species": "Корова"
+}, {
+  "animal_name": "Коза_1",
+  "health_status": "Больна",
+  "test_date": "2017-03-12",
+  "milk_yield": 2,
+  "species": "Коза"
+}, {
+  "animal_name": "Овца_1",
+  "health_status": "Здорова",
+  "test_date": "2017-03-12",
+  "milk_yield": 4,
+  "species": "Овца"
+}
+
+]

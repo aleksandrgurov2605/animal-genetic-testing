@@ -24,12 +24,12 @@ async def get_all_animal_gts(db: AsyncSession = Depends(get_async_db)):
     return animal_gts
 
 
-@router.get("/}", response_model=list[GeneticTestFromDB])
+@router.get("/by_species", response_model=list[GeneticTestFromDB])
 async def get_animal_by_species(species: str, db: AsyncSession = Depends(get_async_db)):
     """
     Возвращает список генетических тестов животных определенного вида.
     """
-    if species not in AnimalSpecies:
+    if species not in [species for species in AnimalSpecies]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Species not found. Доступные виды животных:" \
                                    f" {", ".join(species for species in AnimalSpecies)}")
@@ -78,7 +78,7 @@ async def edit_animal_gt(
 
 
 @router.delete("/{animal_gt_id}", response_model=dict, status_code=status.HTTP_200_OK)
-async def edit_animal_gt(
+async def delete_animal_gt(
         animal_gt_id: int,
         db: AsyncSession = Depends(get_async_db)
 ):
@@ -93,8 +93,10 @@ async def edit_animal_gt(
     await db.execute(
         delete(AnimalGeneticTests).where(AnimalGeneticTests.id == animal_gt_id)
     )
+    await db.commit()
 
     return {
         "message": "Данные успешно удалены",
         "id": animal_gt_id
     }
+

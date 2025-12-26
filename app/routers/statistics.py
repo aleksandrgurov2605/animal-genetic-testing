@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, text, Float, func, and_, cast, case
+from sqlalchemy import select, text, Float, func, and_, cast, case, Numeric
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +12,7 @@ router = APIRouter(
     prefix="/statistics",
     tags=["statistics"],
 )
+
 
 @router.get("/", response_model=list[Statistics])
 async def get_statistics(db: AsyncSession = Depends(get_async_db)):
@@ -43,13 +44,13 @@ async def get_statistics(db: AsyncSession = Depends(get_async_db)):
         select(
             AnimalGeneticTests.species.label('species'),
             func.count().label('total_tests'),
-            func.round(func.avg(cast(AnimalGeneticTests.milk_yield, Float)), 4).label('avg_milk_yield'),
-            func.max(cast(AnimalGeneticTests.milk_yield, Float)).label('max_milk_yield'),
+            func.round(func.avg(cast(AnimalGeneticTests.milk_yield, Numeric)), 4).label('avg_milk_yield'),
+            func.max(cast(AnimalGeneticTests.milk_yield, Numeric)).label('max_milk_yield'),
             func.round(
                 cast(
                     (func.sum(
                         case((AnimalGeneticTests.health_status.like('Здорова'), 1), else_=0)) / func.count()) * 100,
-                    Float
+                    Numeric
                 ),
                 4
             ).label('good_health_percentage')
@@ -58,7 +59,7 @@ async def get_statistics(db: AsyncSession = Depends(get_async_db)):
         .group_by(AnimalGeneticTests.species)
     )
     statistics = await db.execute(stmt)
-    if statistics is None:
+    if not statistics:
         return HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='There are no statistics'
