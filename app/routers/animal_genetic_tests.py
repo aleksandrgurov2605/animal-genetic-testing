@@ -3,8 +3,9 @@ from sqlalchemy import select, update, delete
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth import get_current_user
 from app.db.db_depends import get_async_db
-from app.models import AnimalGeneticTests
+from app.models import AnimalGeneticTests, User
 from app.schemas import GeneticTest, GeneticTestFromDB, AnimalSpecies
 
 # Создаём маршрутизатор с префиксом и тегом
@@ -39,12 +40,16 @@ async def get_animal_by_species(species: str, db: AsyncSession = Depends(get_asy
 
 
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
-async def create_animal_gt(animal_gt: GeneticTest, db: AsyncSession = Depends(get_async_db)):
+async def create_animal_gt(
+        animal_gt: GeneticTest,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: User = Depends(get_current_user)
+):
     """
     Создаёт новый генетический тест животного.
     """
     # Создание нового генетического теста животного
-    db_animal_gt = AnimalGeneticTests(**animal_gt.model_dump())
+    db_animal_gt = AnimalGeneticTests(**animal_gt.model_dump(), user_id=current_user.id)
     db.add(db_animal_gt)
     await db.commit()
     await db.refresh(db_animal_gt)
@@ -58,7 +63,8 @@ async def create_animal_gt(animal_gt: GeneticTest, db: AsyncSession = Depends(ge
 async def edit_animal_gt(
         animal_gt_id: int,
         animal_gt: GeneticTest,
-        db: AsyncSession = Depends(get_async_db)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: User = Depends(get_current_user)
 ):
     """
     Редактирует генетический тест животного.
@@ -80,7 +86,8 @@ async def edit_animal_gt(
 @router.delete("/{animal_gt_id}", response_model=dict, status_code=status.HTTP_200_OK)
 async def delete_animal_gt(
         animal_gt_id: int,
-        db: AsyncSession = Depends(get_async_db)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: User = Depends(get_current_user)
 ):
     """
     Удаляет генетический тест животного.
@@ -99,4 +106,3 @@ async def delete_animal_gt(
         "message": "Данные успешно удалены",
         "id": animal_gt_id
     }
-

@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
 
 class HealthStatus(str, Enum):
@@ -16,6 +16,12 @@ class AnimalSpecies(str, Enum):
 
 
 class GeneticTest(BaseModel):
+    animal_name: str = Field(min_length=2, max_length=30, description="Имя животного")
+    species: AnimalSpecies = Field(description="Вид животного: Корова, Овца, Коза")
+    test_date: date = Field(description="Дата проведения генетического теста животного")
+    milk_yield: float = Field(ge=0, lt=50, description="Продуктивность животного в литрах")
+    health_status: HealthStatus = Field(description="Состояние здоровья животного: Здорова, Больна")
+
     model_config = ConfigDict(
         json_schema_extra={
             'examples': [
@@ -29,16 +35,9 @@ class GeneticTest(BaseModel):
             ]
         }
     )
-    animal_name: str = Field(min_length=2, max_length=30, description="Имя животного")
-    species: AnimalSpecies = Field(description="Вид животного: Корова, Овца, Коза")
-    test_date: date = Field(description="Дата проведения генетического теста животного")
-    milk_yield: float = Field(ge=0, lt=50, description="Продуктивность животного в литрах")
-    health_status: HealthStatus = Field(description="Состояние здоровья животного: Здорова, Больна")
 
 
 class GeneticTestFromDB(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
     id: int
     animal_name: str
     species: AnimalSpecies
@@ -46,6 +45,8 @@ class GeneticTestFromDB(BaseModel):
     milk_yield: float
     health_status: HealthStatus
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Statistics(BaseModel):
@@ -56,3 +57,27 @@ class Statistics(BaseModel):
     good_health_percentage: float = Field(
         description="Процент животных с хорошим состоянием здоровья для данного вида животного"
     )
+
+
+class UserCreate(BaseModel):
+    email: EmailStr = Field(description="Email пользователя")
+    password: str = Field(min_length=8, description="Пароль (минимум 8 символов)")
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            'examples': [
+                {
+                    "email": "user@example.com",
+                    "password": "stringst"
+                }
+            ]
+        }
+    )
+
+
+class User(BaseModel):
+    id: int
+    email: EmailStr
+    is_active: bool
+
+    model_config = ConfigDict(from_attributes=True)

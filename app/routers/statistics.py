@@ -19,27 +19,6 @@ async def get_statistics(db: AsyncSession = Depends(get_async_db)):
     """
     Возвращает статистику генетических тестов животных.
     """
-    # textual_sql = text('''
-    #                    SELECT species,
-    #                           COUNT(*) AS total_tests,
-    #                           ROUND((SUM(milk_yield) / COUNT(*)), 4) AS avg_milk_yield,
-    #                           MAX(milk_yield) as max_milk_yield,
-    #                           ROUND(CAST((
-    #                                 SELECT COUNT(health_status)
-    #                                 FROM animal_genetic_tests AS gt1
-    #                                 WHERE health_status LIKE 'Здорова' AND gt1.species = animal_genetic_tests.species
-    #                                 )
-    #                           / (
-    #                              SELECT COUNT(health_status)
-    #                              FROM animal_genetic_tests AS gt2
-    #                              WHERE gt2.species = animal_genetic_tests.species
-    #                              ) AS numeric)
-    #                          , 4) AS good_health_percentage
-    #                    FROM animal_genetic_tests
-    #                    GROUP BY species
-    #                    ''')
-    # statistics = await db.execute(textual_sql)
-
     stmt = (
         select(
             AnimalGeneticTests.species.label('species'),

@@ -1,16 +1,12 @@
-from typing import AsyncGenerator
-
 import pytest
 import json
 from datetime import date
 
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy import insert, NullPool
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from app.core.config import settings
 from app.db.database import Base, async_session_maker, async_engine
-from app.db.db_depends import get_async_db
+
 from app.main import app as fastapi_app, app
 from app.models import AnimalGeneticTests
 

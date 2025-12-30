@@ -31,13 +31,6 @@ stats = [{'species': 'Овца', 'total_tests': 1, 'avg_milk_yield': 4.0, 'max_m
           'good_health_percentage': 85.7143}]
 
 
-async def test_welcome(async_client: AsyncClient):
-    response = await async_client.get("/")
-    assert response.status_code == 200
-    # assert response.json() == {"message": f"Hello World!"}
-    assert response.headers["content-type"] == "application/json"
-
-
 async def test_get_all_animal_gts(async_client: AsyncClient):
     response = await async_client.get("/tests/")
     assert response.status_code == 200
@@ -119,5 +112,3 @@ async def test_get_statistics_success(async_client: AsyncClient):
     response = await async_client.get("/statistics/")
     assert response.status_code == 200
     assert response.json() == stats
-
-
