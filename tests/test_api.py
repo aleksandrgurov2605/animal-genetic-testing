@@ -52,57 +52,119 @@ async def test_get_animal_by_species_not_found(async_client: AsyncClient):
     assert "application/json" in response.headers["content-type"]
 
 
-async def test_create_animal_gt_success(async_client: AsyncClient):
-    response = await async_client.post("/tests/", json=correct_data_for_post_test)
+async def test_create_animal_gt_success(async_client: AsyncClient, test_user_token):
+    token = test_user_token(username="test@test.com")
+    response = await async_client.post(
+        "/tests/",
+        json=correct_data_for_post_test,
+        headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 201
     assert response.json()["message"] == "Данные успешно добавлены"
     assert "application/json" in response.headers["content-type"]
 
 
-async def test_create_animal_gt_unsuccess(async_client: AsyncClient):
-    response = await async_client.post("/tests/", json=incorrect_data_for_post_test)
+async def test_create_animal_gt_unsuccess(async_client: AsyncClient, test_user_token):
+    token = test_user_token(username="test@test.com")
+    response = await async_client.post(
+        "/tests/",
+        json=incorrect_data_for_post_test,
+        headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 422
     assert response.json()["detail"][0]["msg"] == "Input should be 'Корова', 'Коза' or 'Овца'"
     assert "application/json" in response.headers["content-type"]
 
 
-async def test_edit_animal_gt_success(async_client: AsyncClient):
-    response = await async_client.post("/tests/", json=correct_data_for_post_test)
+async def test_create_without_auth_unsuccess(async_client: AsyncClient):
+    response = await async_client.post(
+        "/tests/",
+        json=correct_data_for_post_test
+    )
+    assert response.status_code == 401
+
+
+async def test_create_with_incorrect_token_unsuccess(async_client: AsyncClient, test_user_token):
+    token = test_user_token(username="test@test.com")
+    response = await async_client.post(
+        "/tests/",
+        json=correct_data_for_post_test,
+        headers={"Authorization": f"Bearer {token}a"}
+    )
+    assert response.status_code == 401
+
+
+async def test_edit_animal_gt_success(async_client: AsyncClient, test_user_token):
+    token = test_user_token(username="test@test.com")
+    response = await async_client.post(
+        "/tests/",
+        json=correct_data_for_post_test,
+        headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 201
     created = response.json()
-    put_response = await async_client.put(f"/tests/{created['id']}", json=correct_data_for_put_test)
+    put_response = await async_client.put(
+        f"/tests/{created['id']}",
+        json=correct_data_for_put_test,
+        headers={"Authorization": f"Bearer {token}"}
+    )
     assert put_response.status_code == 200
     updated = put_response.json()
     assert updated["animal_name"] == "Бурёнка_Edit_version"
     assert updated["milk_yield"] == 12
 
 
-async def test_edit_animal_gt_unsuccess(async_client: AsyncClient):
-    response = await async_client.post("/tests/", json=correct_data_for_post_test)
+async def test_edit_animal_gt_unsuccess(async_client: AsyncClient, test_user_token):
+    token = test_user_token(username="test@test.com")
+    response = await async_client.post(
+        "/tests/",
+        json=correct_data_for_post_test,
+        headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 201
     created = response.json()
-    put_response = await async_client.put(f"/tests/{created['id']}", json=incorrect_data_for_post_test)
+    put_response = await async_client.put(
+        f"/tests/{created['id']}",
+        json=incorrect_data_for_post_test,
+        headers={"Authorization": f"Bearer {token}"}
+    )
     assert put_response.status_code == 422
     updated = put_response.json()
     assert updated["detail"][0]["msg"] == "Input should be 'Корова', 'Коза' or 'Овца'"
 
 
-async def test_delete_animal_gt_success(async_client: AsyncClient):
-    response = await async_client.post("/tests/", json=correct_data_for_post_test)
+async def test_delete_animal_gt_success(async_client: AsyncClient, test_user_token):
+    token = test_user_token(username="test@test.com")
+    response = await async_client.post(
+        "/tests/",
+        json=correct_data_for_post_test,
+        headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 201
     created = response.json()
-    put_response = await async_client.delete(f"/tests/{created['id']}")
+    put_response = await async_client.delete(
+        f"/tests/{created['id']}",
+        headers={"Authorization": f"Bearer {token}"}
+    )
     assert put_response.status_code == 200
     deleted = put_response.json()
     assert deleted["message"] == "Данные успешно удалены"
     assert deleted["id"] == created['id']
 
 
-async def test_delete_animal_gt_unsuccess(async_client: AsyncClient):
-    response = await async_client.post("/tests/", json=correct_data_for_post_test)
+async def test_delete_animal_gt_unsuccess(async_client: AsyncClient, test_user_token):
+    token = test_user_token(username="test@test.com")
+    response = await async_client.post(
+        "/tests/",
+        json=correct_data_for_post_test,
+        headers={"Authorization": f"Bearer {token}"}
+    )
     assert response.status_code == 201
     created = response.json()
-    put_response = await async_client.delete(f"/tests/{created['id'] + 100}")
+    put_response = await async_client.delete(
+        f"/tests/{created['id'] + 100}",
+        headers={"Authorization": f"Bearer {token}"}
+    )
     assert put_response.status_code == 404
     deleted = put_response.json()
     assert deleted["detail"] == "Genetic Test not found"
