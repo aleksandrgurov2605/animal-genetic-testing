@@ -1,14 +1,13 @@
+import json
+from datetime import date, datetime, timedelta
+
 import jwt
 import pytest
-import json
-from datetime import datetime, timedelta, date
-
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from app.core.config import settings
-from app.db.database import Base, async_session_maker, async_engine
-
-from app.main import app as fastapi_app, app
+from app.db.database import Base, async_engine, async_session_maker
+from app.main import app as fastapi_app
 from app.models import AnimalGeneticTests, User
 
 SECRET_KEY = settings.SECRET_KEY
@@ -45,10 +44,7 @@ async def prepare_database():
 @pytest.fixture(scope="function")
 def test_user_token():
     def _create_token(username: str):
-        payload = {
-            "sub": username,
-            "exp": datetime.now() + timedelta(hours=1)
-        }
+        payload = {"sub": username, "exp": datetime.now() + timedelta(hours=1)}
         return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
     return _create_token

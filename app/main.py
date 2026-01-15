@@ -11,7 +11,7 @@ app = FastAPI(
 
 @app.get("/")
 async def root():
-    return {"message": f"Добро пожаловать в API Animal Genetic Testing!"}
+    return {"message": "Добро пожаловать в API Animal Genetic Testing!"}
 
 
 app.include_router(animal_gts_router)

@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, update, delete
-
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import get_current_user
 from app.db.db_depends import get_async_db
 from app.models import AnimalGeneticTests, User
-from app.schemas import GeneticTest, GeneticTestFromDB, AnimalSpecies
+from app.schemas import AnimalSpecies, GeneticTest, GeneticTestFromDB
 
 # Создаём маршрутизатор с префиксом и тегом
 router = APIRouter(
@@ -31,19 +30,23 @@ async def get_animal_by_species(species: str, db: AsyncSession = Depends(get_asy
     Возвращает список генетических тестов животных определенного вида.
     """
     if species not in [species for species in AnimalSpecies]:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Species not found. Доступные виды животных:" \
-                                   f" {", ".join(species for species in AnimalSpecies)}")
-    result = await db.scalars(select(AnimalGeneticTests).where(AnimalGeneticTests.species == species))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Species not found. Доступные виды животных:"
+            f" {", ".join(species for species in AnimalSpecies)}",
+        )
+    result = await db.scalars(
+        select(AnimalGeneticTests).where(AnimalGeneticTests.species == species)
+    )
     animal_gts = result.all()
     return animal_gts
 
 
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def create_animal_gt(
-        animal_gt: GeneticTest,
-        db: AsyncSession = Depends(get_async_db),
-        current_user: User = Depends(get_current_user)
+    animal_gt: GeneticTest,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Создаёт новый генетический тест животного.
@@ -53,29 +56,34 @@ async def create_animal_gt(
     db.add(db_animal_gt)
     await db.commit()
     await db.refresh(db_animal_gt)
-    return {
-        "message": "Данные успешно добавлены",
-        "id": db_animal_gt.id
-    }
+    return {"message": "Данные успешно добавлены", "id": db_animal_gt.id}
 
 
-@router.put("/{animal_gt_id}", response_model=GeneticTest, status_code=status.HTTP_200_OK)
+@router.put(
+    "/{animal_gt_id}", response_model=GeneticTest, status_code=status.HTTP_200_OK
+)
 async def edit_animal_gt(
-        animal_gt_id: int,
-        animal_gt: GeneticTest,
-        db: AsyncSession = Depends(get_async_db),
-        current_user: User = Depends(get_current_user)
+    animal_gt_id: int,
+    animal_gt: GeneticTest,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Редактирует генетический тест животного.
     """
-    result = await db.scalars(select(AnimalGeneticTests).where(AnimalGeneticTests.id == animal_gt_id))
+    result = await db.scalars(
+        select(AnimalGeneticTests).where(AnimalGeneticTests.id == animal_gt_id)
+    )
     db_test_result = result.first()
     if not db_test_result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Genetic Test not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Genetic Test not found"
+        )
 
     await db.execute(
-        update(AnimalGeneticTests).where(AnimalGeneticTests.id == animal_gt_id).values(**animal_gt.model_dump())
+        update(AnimalGeneticTests)
+        .where(AnimalGeneticTests.id == animal_gt_id)
+        .values(**animal_gt.model_dump())
     )
 
     await db.commit()
@@ -85,24 +93,25 @@ async def edit_animal_gt(
 
 @router.delete("/{animal_gt_id}", response_model=dict, status_code=status.HTTP_200_OK)
 async def delete_animal_gt(
-        animal_gt_id: int,
-        db: AsyncSession = Depends(get_async_db),
-        current_user: User = Depends(get_current_user)
+    animal_gt_id: int,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Удаляет генетический тест животного.
     """
-    result = await db.scalars(select(AnimalGeneticTests).where(AnimalGeneticTests.id == animal_gt_id))
+    result = await db.scalars(
+        select(AnimalGeneticTests).where(AnimalGeneticTests.id == animal_gt_id)
+    )
     db_test_result = result.first()
     if not db_test_result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Genetic Test not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Genetic Test not found"
+        )
 
     await db.execute(
         delete(AnimalGeneticTests).where(AnimalGeneticTests.id == animal_gt_id)
     )
     await db.commit()
 
-    return {
-        "message": "Данные успешно удалены",
-        "id": animal_gt_id
-    }
+    return {"message": "Данные успешно удалены", "id": animal_gt_id}

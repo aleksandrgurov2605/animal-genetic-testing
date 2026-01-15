@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Integer, DateTime, func, ForeignKey
+from sqlalchemy import DateTime, ForeignKey, Integer, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
@@ -15,7 +15,9 @@ class AnimalGeneticTests(Base):
     test_date: Mapped[datetime.date]
     milk_yield: Mapped[float]
     health_status: Mapped[str]
-    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.now()
+    )
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
     user: Mapped["User"] = relationship("User", back_populates="tests")
@@ -29,4 +31,6 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     is_active: Mapped[bool] = mapped_column(default=True)
 
-    tests: Mapped[list["AnimalGeneticTests"]] = relationship("AnimalGeneticTests", back_populates="user")
+    tests: Mapped[list["AnimalGeneticTests"]] = relationship(
+        "AnimalGeneticTests", back_populates="user"
+    )

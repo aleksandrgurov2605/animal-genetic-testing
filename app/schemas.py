@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class HealthStatus(str, Enum):
@@ -19,18 +19,22 @@ class GeneticTest(BaseModel):
     animal_name: str = Field(min_length=2, max_length=30, description="Имя животного")
     species: AnimalSpecies = Field(description="Вид животного: Корова, Овца, Коза")
     test_date: date = Field(description="Дата проведения генетического теста животного")
-    milk_yield: float = Field(ge=0, lt=50, description="Продуктивность животного в литрах")
-    health_status: HealthStatus = Field(description="Состояние здоровья животного: Здорова, Больна")
+    milk_yield: float = Field(
+        ge=0, lt=50, description="Продуктивность животного в литрах"
+    )
+    health_status: HealthStatus = Field(
+        description="Состояние здоровья животного: Здорова, Больна"
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
-            'examples': [
+            "examples": [
                 {
-                    'animal_name': 'Бурёнка',
-                    'species': 'Корова',
-                    'test_date': '2017-03-12',
-                    'milk_yield': '22.4',
-                    'health_status': 'Здорова'
+                    "animal_name": "Бурёнка",
+                    "species": "Корова",
+                    "test_date": "2017-03-12",
+                    "milk_yield": "22.4",
+                    "health_status": "Здорова",
                 }
             ]
         }
@@ -52,10 +56,14 @@ class GeneticTestFromDB(BaseModel):
 class Statistics(BaseModel):
     species: str = Field(description="Вид животного: Корова, Овца, Коза")
     total_tests: int = Field(description="Количество тестов для данного вида животного")
-    avg_milk_yield: float = Field(description="Среднее значение продуктивности для данного вида животного")
-    max_milk_yield: float = Field(description="Максимальное значение продуктивности для данного вида животного")
+    avg_milk_yield: float = Field(
+        description="Среднее значение продуктивности для данного вида животного"
+    )
+    max_milk_yield: float = Field(
+        description="Максимальное значение продуктивности для данного вида животного"
+    )
     good_health_percentage: float = Field(
-        description="Процент животных с хорошим состоянием здоровья для данного вида животного"
+        description="Процент животных данного вида с хорошим состоянием здоровья"
     )
 
 
@@ -65,12 +73,7 @@ class UserCreate(BaseModel):
 
     model_config = ConfigDict(
         json_schema_extra={
-            'examples': [
-                {
-                    "email": "user@example.com",
-                    "password": "stringst"
-                }
-            ]
+            "examples": [{"email": "user@example.com", "password": "stringst"}]
         }
     )
 
